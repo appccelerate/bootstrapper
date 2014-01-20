@@ -1,4 +1,1 @@
-bootstrapper
-============
-
-Flexible .net application or service bootstrapping based on an extension model.
+Please see http://www.appccelerate.com/bootstrapper.html for documentation.

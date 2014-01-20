@@ -1,0 +1,45 @@
+﻿<?xml version="1.0"?>
+<package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>Appccelerate.Bootstrapper</id>
+    <version>0.0.0</version>
+    <title>Appccelerate.Bootstrapper</title>
+    <authors>Appccelerate team</authors>
+    <owners>Appccelerate team</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</licenseUrl>
+    <projectUrl>https://github.com/appccelerate/bootstrapper</projectUrl>
+    <iconUrl>https://github.com/appccelerate/appccelerate/raw/master/docs/nuget.png</iconUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+  <summary>Bootstrapper provides a simple and flexible way to make your application's startup and shutdown behavior pluggable and extensible.</summary>
+    <description>
+      Bootstrapper provides a simple and flexible way to make your application's startup and shutdown behavior pluggable and extensible:
+      The bootstrapper provides a single entry point to startup and shutdown the application,
+      Fluent definition syntax allowing to expressively define the startup and shutdown behavior of the application,
+      Pluggable behaviors which allow to extend the bootstrapping mechanism in AOP like style,
+      ConfigurationSection support with behavior,
+      Unobtrusive Key/Value pair configuration section support with behavior,
+      Thorough reporting of application startup and shutdown behavior.
+    </description>
+    <releaseNotes>
+        2.1: built using new build infrastructure (no functional changes)
+        2: targets now .Net 4.5
+    </releaseNotes>
+    <copyright>Copyright 2012-2014</copyright>
+    <tags>Appccelerate bootstrapper startup shutdown</tags>
+  <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System" targetFramework="net45" />
+      <frameworkAssembly assemblyName="System.Core" targetFramework="net45" />
+      <frameworkAssembly assemblyName="System.Configuration" targetFramework="net45" />
+      <frameworkAssembly assemblyName="System.Xml.Linq" targetFramework="net45" />
+    </frameworkAssemblies>
+    <dependencies>
+      <dependency id="Appccelerate.Fundamentals" version="[2.0,3.0)" />
+    </dependencies>	
+  </metadata>
+  <files>
+    <file src="Appccelerate.Bootstrapper\bin\Release\Appccelerate.Bootstrapper.dll" target="lib\net45" />
+    <file src="Appccelerate.Bootstrapper\bin\Release\Appccelerate.Bootstrapper.pdb" target="lib\net45" />
+    <file src="Appccelerate.Bootstrapper\bin\Release\Appccelerate.Bootstrapper.xml" target="lib\net45" />
+    <file src="Appccelerate.Bootstrapper\**\*.cs" target="src" />
+  </files>  
+</package>
