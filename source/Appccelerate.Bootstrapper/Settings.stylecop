@@ -7,6 +7,7 @@
       <Value>csv</Value>
       <Value>deserialize</Value>
       <Value>deserialized</Value>
+      <Value>executables</Value>
       <Value>remoting</Value>
       <Value>serialized</Value>
       <Value>serializer</Value>
