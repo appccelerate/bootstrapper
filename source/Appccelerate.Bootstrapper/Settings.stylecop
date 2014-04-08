@@ -9,6 +9,16 @@
       <Value>deserialize</Value>
       <Value>csv</Value>
       <Value>remoting</Value>
+      <Value>args</Value>
+      <Value>async</Value>
+      <Value>Bootstrapper</Value>
+      <Value>csv</Value>
+      <Value>deserialize</Value>
+      <Value>deserialized</Value>
+      <Value>executables</Value>
+      <Value>remoting</Value>
+      <Value>serialized</Value>
+      <Value>serializer</Value>
     </CollectionProperty>
     <StringProperty Name="MergeSettingsFiles">NoMerge</StringProperty>
   </GlobalSettings>
