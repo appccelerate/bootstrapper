@@ -1,6 +1,6 @@
 //-------------------------------------------------------------------------------
 // <copyright file="BootstrapperWithBehaviorSpecification.cs" company="Appccelerate">
-//   Copyright (c) 2008-2013
+//   Copyright (c) 2008-2014
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ namespace Appccelerate.Bootstrapper
 
         protected static IBootstrapper<ICustomExtension> Bootstrapper;
 
+        protected static Queue<string> SequenceQueue;
+
         Establish context = () =>
         {
             SequenceQueue = new Queue<string>();
@@ -44,7 +46,5 @@ namespace Appccelerate.Bootstrapper
             First = new FirstExtension(SequenceQueue);
             Second = new SecondExtension(SequenceQueue);
         };
-
-        protected static Queue<string> SequenceQueue;
     }
 }
