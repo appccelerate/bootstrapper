@@ -3,6 +3,7 @@
     <CollectionProperty Name="RecognizedWords">
       <Value>async</Value>
       <Value>args</Value>
+      <Value>aspx</Value>
       <Value>serializer</Value>
       <Value>serialized</Value>
       <Value>deserialized</Value>
