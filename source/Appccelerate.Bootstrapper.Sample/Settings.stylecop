@@ -1,15 +1,20 @@
 <StyleCopSettings Version="105">
   <GlobalSettings>
     <CollectionProperty Name="RecognizedWords">
-      <Value>async</Value>
       <Value>args</Value>
       <Value>aspx</Value>
-      <Value>serializer</Value>
-      <Value>serialized</Value>
-      <Value>deserialized</Value>
-      <Value>deserialize</Value>
+      <Value>async</Value>
+      <Value>bootstrapper</Value>
       <Value>csv</Value>
+      <Value>deserialize</Value>
+      <Value>deserialized</Value>
+      <Value>funqlet</Value>
+      <Value>Funqlet</Value>
+      <Value>funqlets</Value>
+      <Value>msdn</Value>
       <Value>remoting</Value>
+      <Value>serialized</Value>
+      <Value>serializer</Value>
     </CollectionProperty>
     <StringProperty Name="MergeSettingsFiles">NoMerge</StringProperty>
   </GlobalSettings>

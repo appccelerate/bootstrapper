@@ -117,6 +117,8 @@
     <None Include="appccelerate.bootstrapper.nuspec">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Appccelerate.Public.snk" />
+    <None Include="Appccelerate.snk" />
     <None Include="NuGet.config" />
     <None Include="packages.config" />
     <None Include="Settings.stylecop" />
