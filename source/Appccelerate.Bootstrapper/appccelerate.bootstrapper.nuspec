@@ -21,7 +21,6 @@
       Thorough reporting of application startup and shutdown behavior.
     </description>
     <releaseNotes>
-        2.1: built using new build infrastructure (no functional changes)
         2: targets now .Net 4.5
     </releaseNotes>
     <copyright>Copyright 2012-2014</copyright>
@@ -37,9 +36,9 @@
     </dependencies>	
   </metadata>
   <files>
-    <file src="Appccelerate.Bootstrapper\bin\Release\Appccelerate.Bootstrapper.dll" target="lib\net45" />
-    <file src="Appccelerate.Bootstrapper\bin\Release\Appccelerate.Bootstrapper.pdb" target="lib\net45" />
-    <file src="Appccelerate.Bootstrapper\bin\Release\Appccelerate.Bootstrapper.xml" target="lib\net45" />
-    <file src="Appccelerate.Bootstrapper\**\*.cs" target="src" />
+    <file src="bin\Release\Appccelerate.Bootstrapper.dll" target="lib\net45" />
+    <file src="bin\Release\Appccelerate.Bootstrapper.pdb" target="lib\net45" />
+    <file src="bin\Release\Appccelerate.Bootstrapper.xml" target="lib\net45" />
+    <file src="**\*.cs" target="src" />
   </files>  
 </package>

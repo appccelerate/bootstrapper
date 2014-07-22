@@ -1,6 +1,6 @@
 //-------------------------------------------------------------------------------
 // <copyright file="SyntaxBuilderTest.cs" company="Appccelerate">
-//   Copyright (c) 2008-2013
+//   Copyright (c) 2008-2014
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -617,7 +617,7 @@ namespace Appccelerate.Bootstrapper.Syntax
                 A<Expression<Func<object>>>._, 
                 A<Expression<Action<ICustomExtension, object>>>._, 
                 A<Action<IBehaviorAware<ICustomExtension>, object>>._))
-                .Invokes((Expression<Func<object>> func, Expression<Action<ICustomExtension, object>> action, Action<IBehaviorAware<ICustomExtension>, object>ctx) => contextInitializer = ctx)
+                .Invokes((Expression<Func<object>> func, Expression<Action<ICustomExtension, object>> action, Action<IBehaviorAware<ICustomExtension>, object> ctx) => contextInitializer = ctx)
                 .Returns(A.Fake<IExecutable<ICustomExtension>>());
 
             var context = new object();

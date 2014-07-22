@@ -1,6 +1,6 @@
 ﻿//-------------------------------------------------------------------------------
 // <copyright file="when_the_bootstrapping_process_is_reported.cs" company="Appccelerate">
-//   Copyright (c) 2008-2013
+//   Copyright (c) 2008-2014
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ namespace Appccelerate.Bootstrapper
     using Machine.Specifications;
 
     [Subject(Concern)]
-    public class when_the_bootstrapping_process_is_reported : BootstrapperReportingSpecification
+    public class When_the_bootstrapping_process_is_reported : BootstrapperReportingSpecification
     {
         private static StringReporter ExpectedContextReporter;
         private static StringReporter InterceptingContextReporter;
