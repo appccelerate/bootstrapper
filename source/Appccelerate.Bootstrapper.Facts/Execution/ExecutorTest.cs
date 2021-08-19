@@ -16,6 +16,8 @@
 // </copyright>
 //-------------------------------------------------------------------------------
 
+using Xunit;
+
 namespace Appccelerate.Bootstrapper.Execution
 {
     using System.Collections.Generic;
@@ -58,7 +60,7 @@ namespace Appccelerate.Bootstrapper.Execution
         }
 
         [Theory]
-        [PropertyData("Testees")]
+        [MemberData(nameof(Testees))]
         public void Execute_ShouldExecuteSyntaxWithExtensions(IExecutor<IExtension> testee)
         {
             this.SetupSyntaxReturnsExecutables();
@@ -70,7 +72,7 @@ namespace Appccelerate.Bootstrapper.Execution
         }
 
         [Theory]
-        [PropertyData("Testees")]
+        [MemberData(nameof(Testees))]
         public void Execute_ShouldCreateExecutableContextForExecutables(IExecutor<IExtension> testee)
         {
             this.SetupSyntaxReturnsExecutables();
@@ -82,7 +84,7 @@ namespace Appccelerate.Bootstrapper.Execution
         }
 
         [Theory]
-        [PropertyData("Testees")]
+        [MemberData(nameof(Testees))]
         public void Execute_ShouldProvideExecutableContextForExecutables(IExecutor<IExtension> testee)
         {
             this.SetupSyntaxReturnsExecutables();
@@ -100,7 +102,7 @@ namespace Appccelerate.Bootstrapper.Execution
         }
 
         [Theory]
-        [PropertyData("Testees")]
+        [MemberData(nameof(Testees))]
         public void Name_ShouldReturnTypeName(IExecutor<IExtension> testee)
         {
             string expectedName = testee.GetType().FullNameToString();

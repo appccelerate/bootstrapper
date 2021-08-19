@@ -45,7 +45,7 @@ namespace Appccelerate.Bootstrapper.Syntax.Executables
         /// <param name="action">The action.</param>
         public ActionExecutable(Expression<Action> action)
         {
-            Ensure.ArgumentNotNull(action, "action");
+            Guard.AgainstNullArgument(nameof(action), action);
 
             this.behaviors = new Queue<IBehavior<TExtension>>();
 
@@ -65,7 +65,7 @@ namespace Appccelerate.Bootstrapper.Syntax.Executables
         /// <inheritdoc />
         public void Execute(IEnumerable<TExtension> extensions, IExecutableContext executableContext)
         {
-            Ensure.ArgumentNotNull(executableContext, "executableContext");
+            Guard.AgainstNullArgument(nameof(executableContext), executableContext);
 
             foreach (IBehavior<TExtension> behavior in this.behaviors)
             {

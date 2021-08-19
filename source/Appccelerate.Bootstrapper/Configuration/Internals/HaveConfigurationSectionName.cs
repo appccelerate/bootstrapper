@@ -29,7 +29,7 @@ namespace Appccelerate.Bootstrapper.Configuration.Internals
         /// <param name="extension">The extension.</param>
         public HaveConfigurationSectionName(IExtension extension)
         {
-            Ensure.ArgumentNotNull(extension, "extension");
+            Guard.AgainstNullArgument(nameof(extension), extension);
 
             var namer = extension as IHaveConfigurationSectionName;
 

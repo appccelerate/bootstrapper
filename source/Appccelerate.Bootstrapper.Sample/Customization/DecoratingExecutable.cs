@@ -64,8 +64,6 @@ namespace Appccelerate.Bootstrapper.Sample.Customization
         /// <inheritdoc />
         public void Execute(IEnumerable<TExtension> extensions, IExecutableContext executableContext)
         {
-            Ensure.ArgumentNotNull(executableContext, "executableContext");
-
             Console.WriteLine("::: Executing executable {0}", executableContext.Name);
 
             this.decoratedExecutable.Execute(extensions, executableContext);

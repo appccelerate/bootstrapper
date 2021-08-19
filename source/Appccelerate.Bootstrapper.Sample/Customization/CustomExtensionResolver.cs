@@ -29,8 +29,6 @@ namespace Appccelerate.Bootstrapper.Sample.Customization
         /// <inheritdoc />
         public void Resolve(IExtensionPoint<IComplexExtension> extensionPoint)
         {
-            Ensure.ArgumentNotNull(extensionPoint, "extensionPoint");
-
             extensionPoint.AddExtension(new ExtensionWhichNeedsDependency());
             extensionPoint.AddExtension(new ExtensionWhichIsFunqlet());
             extensionPoint.AddExtension(new ExtensionWithExtensionConfigurationSection());

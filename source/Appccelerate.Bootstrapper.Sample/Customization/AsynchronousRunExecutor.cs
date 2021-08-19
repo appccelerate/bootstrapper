@@ -49,8 +49,6 @@ namespace Appccelerate.Bootstrapper.Sample.Customization
         /// <inheritdoc />
         public void Execute(ISyntax<IComplexExtension> syntax, IEnumerable<IComplexExtension> extensions, IExecutionContext executionContext)
         {
-            Ensure.ArgumentNotNull(syntax, "syntax");
-
             foreach (IExecutable<IComplexExtension> executable in syntax)
             {
                 using (var worker = new Task(

@@ -1,5 +1,5 @@
 //-------------------------------------------------------------------------------
-// <copyright file="BootstrapperWithConfigurationSectionBehaviorSpecification.cs" company="Appccelerate">
+// <copyright file="TypeExtensionsFacts.cs" company="Appccelerate">
 //   Copyright (c) 2008-2015
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,24 +16,29 @@
 // </copyright>
 //-------------------------------------------------------------------------------
 
-namespace Appccelerate.Bootstrapper
+using Xunit;
+
+namespace Appccelerate.Formatters
 {
-    using Appccelerate.Bootstrapper.Dummies;
-    using Machine.Specifications;
+    using System;
+    using System.Collections.Generic;
+    using FluentAssertions;
 
-    public class BootstrapperWithConfigurationSectionBehaviorSpecification
+    using Xunit.Extensions;
+    
+    public class TypeExtensionsFacts
     {
-        protected const string Concern = "Bootstrapping with configuration section";
-
-        protected static CustomExtensionWithConfigurationStrategy Strategy;
-
-        protected static IBootstrapper<ICustomExtensionWithConfiguration> Bootstrapper;
-
-        Establish context = () =>
+        [Theory]
+        [InlineData(
+            typeof(KeyValuePair<string, string>), 
+            "System.Collections.Generic.KeyValuePair<System.String,System.String>")]
+        [InlineData(
+            typeof(ICollection<int>), 
+            "System.Collections.Generic.ICollection<System.Int32>")]
+        public void PrintsFullNameOfAGenericTypeWithReadableTypeParameters(Type type, string expectedPrettyPrint)
         {
-            Bootstrapper = new DefaultBootstrapper<ICustomExtensionWithConfiguration>();
-
-            Strategy = new CustomExtensionWithConfigurationStrategy();
-        };
+            type.FullNameToString()
+                .Should().Be(expectedPrettyPrint);
+        }
     }
 }

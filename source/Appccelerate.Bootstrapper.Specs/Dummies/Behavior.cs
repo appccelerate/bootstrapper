@@ -36,13 +36,7 @@ namespace Appccelerate.Bootstrapper.Dummies
         }
 
         /// <inheritdoc />
-        public string Name
-        {
-            get
-            {
-                return this.GetType().FullNameToString();
-            }
-        }
+        public string Name => this.GetType().FullNameToString();
 
         /// <inheritdoc />
         public void Behave(IEnumerable<ICustomExtension> extensions)

@@ -43,8 +43,8 @@ namespace Appccelerate.Bootstrapper.Execution
         /// <inheritdoc />
         public void Execute(ISyntax<TExtension> syntax, IEnumerable<TExtension> extensions, IExecutionContext executionContext)
         {
-            Ensure.ArgumentNotNull(syntax, "syntax");
-            Ensure.ArgumentNotNull(executionContext, "executionContext");
+            Guard.AgainstNullArgument(nameof(executionContext), syntax);
+            Guard.AgainstNullArgument(nameof(executionContext), executionContext);
 
             var reversedExtensions = new Stack<TExtension>(extensions);
 

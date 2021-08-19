@@ -45,9 +45,6 @@ namespace Appccelerate.Bootstrapper.Sample.Complex.Extensions
         /// <inheritdoc />
         public void Apply(ConfigurationSection section)
         {
-            Ensure.ArgumentNotNull(section, "section");
-            Ensure.ArgumentTypeAssignableFrom(typeof(CustomConfigurationSection), section.GetType(), "section");
-
             this.section = (CustomConfigurationSection)section;
         }
 

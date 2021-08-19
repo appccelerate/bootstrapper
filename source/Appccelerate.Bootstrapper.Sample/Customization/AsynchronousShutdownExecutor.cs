@@ -49,8 +49,6 @@ namespace Appccelerate.Bootstrapper.Sample.Customization
         /// <inheritdoc />
         public void Execute(ISyntax<IComplexExtension> syntax, IEnumerable<IComplexExtension> extensions, IExecutionContext executionContext)
         {
-            Ensure.ArgumentNotNull(syntax, "syntax");
-
             var reversedExtensions = new Stack<IComplexExtension>(extensions);
 
             foreach (IExecutable<IComplexExtension> executable in syntax)

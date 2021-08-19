@@ -18,64 +18,73 @@
 
 namespace Appccelerate.Bootstrapper
 {
+    using Dummies;
     using System.Collections.Generic;
-    using System.Linq;
-    using Appccelerate.Bootstrapper.Dummies;
     using FluentAssertions;
-    using Machine.Specifications;
+    using Xunit;
 
-    [Subject(Concern)]
-    public class When_the_bootstrapper_is_run : BootstrapperSpecification
+    public class WhenTheBootstrapperIsRun
     {
-        Establish context = () =>
+        private readonly Queue<string> sequenceQueue;
+        private readonly CustomExtensionStrategy strategy;
+        private readonly FirstExtension first;
+        private readonly SecondExtension second;
+
+        public WhenTheBootstrapperIsRun()
+        {
+            sequenceQueue = new Queue<string>();
+            strategy = new CustomExtensionStrategy(sequenceQueue);
+            first = new FirstExtension(sequenceQueue);
+            second = new SecondExtension(sequenceQueue);
+
+            var bootstrapper = new DefaultBootstrapper<ICustomExtension>();
+            bootstrapper.Initialize(strategy);
+            bootstrapper.AddExtension(first);
+            bootstrapper.AddExtension(second);
+            bootstrapper.Run();
+        }
+
+        [Fact]
+        public void should_only_initialize_contexts_once_for_all_extensions()
+        {
+            strategy.RunConfigurationInitializerAccessCounter.Should().Be(1);
+        }
+
+        [Fact]
+        public void should_pass_the_initialized_values_from_the_contexts_to_the_extensions()
+        {
+            var expected = new Dictionary<string, string>
             {
-                Bootstrapper.Initialize(Strategy);
-                Bootstrapper.AddExtension(First);
-                Bootstrapper.AddExtension(Second);
+                { "RunTest", "RunTestValue" }
             };
 
-        Because of = () =>
+            first.RunConfiguration.Should().Equal(expected);
+            second.RunConfiguration.Should().Equal(expected);
+
+            first.Registered.Should().Be("RunTest");
+            second.Registered.Should().Be("RunTest");
+        }
+
+        [Fact]
+        public void should_execute_the_extensions_and_the_extension_points_according_to_the_strategy_defined_order()
+        {
+            sequenceQueue.Should().HaveCount(9, sequenceQueue.Flatten());
+            sequenceQueue.Should().BeEquivalentTo(new[]
             {
-                Bootstrapper.Run();
-            };
+                "Action: CustomRun",
 
-        It should_only_initialize_contexts_once_for_all_extensions = () =>
-            {
-                Strategy.RunConfigurationInitializerAccessCounter.Should().Be(1);
-            };
+                "FirstExtension: Start",
+                "SecondExtension: Start",
 
-        It should_pass_the_initialized_values_from_the_contexts_to_the_extensions = () =>
-            {
-                var expected = new Dictionary<string, string>
-                    {
-                        { "RunTest", "RunTestValue" }
-                    };
+                "FirstExtension: Configure",
+                "SecondExtension: Configure",
 
-                First.RunConfiguration.Should().Equal(expected);
-                Second.RunConfiguration.Should().Equal(expected);
+                "FirstExtension: Initialize",
+                "SecondExtension: Initialize",
 
-                First.Registered.Should().Be("RunTest");
-                Second.Registered.Should().Be("RunTest");
-            };
-
-        It should_execute_the_extensions_and_the_extension_points_according_to_the_strategy_defined_order = () =>
-            {
-                var sequence = SequenceQueue;
-
-                sequence.Should().HaveCount(9, sequence.Flatten());
-                sequence.ElementAt(0).Should().BeEquivalentTo("Action: CustomRun");
-
-                sequence.ElementAt(1).Should().BeEquivalentTo("FirstExtension: Start");
-                sequence.ElementAt(2).Should().BeEquivalentTo("SecondExtension: Start");
-
-                sequence.ElementAt(3).Should().BeEquivalentTo("FirstExtension: Configure");
-                sequence.ElementAt(4).Should().BeEquivalentTo("SecondExtension: Configure");
-
-                sequence.ElementAt(5).Should().BeEquivalentTo("FirstExtension: Initialize");
-                sequence.ElementAt(6).Should().BeEquivalentTo("SecondExtension: Initialize");
-
-                sequence.ElementAt(7).Should().BeEquivalentTo("FirstExtension: Register");
-                sequence.ElementAt(8).Should().BeEquivalentTo("SecondExtension: Register");
-            };
+                "FirstExtension: Register",
+                "SecondExtension: Register"
+            });
+        }
     }
 }

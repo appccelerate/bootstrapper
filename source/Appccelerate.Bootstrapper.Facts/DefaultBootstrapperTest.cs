@@ -59,7 +59,7 @@ namespace Appccelerate.Bootstrapper
 
             this.testee.Initialize(this.strategy);
 
-            this.testee.Invoking(x => x.Initialize(A.Fake<IStrategy<IExtension>>())).ShouldThrow<InvalidOperationException>();
+            this.testee.Invoking(x => x.Initialize(A.Fake<IStrategy<IExtension>>())).Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
@@ -75,7 +75,7 @@ namespace Appccelerate.Bootstrapper
         [Fact]
         public void AddExtension_WhenNotInitialized_ShouldThrowInvalidOperationException()
         {
-            this.testee.Invoking(x => x.AddExtension(A.Fake<IExtension>())).ShouldThrow<InvalidOperationException>();
+            this.testee.Invoking(x => x.AddExtension(A.Fake<IExtension>())).Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
@@ -152,7 +152,7 @@ namespace Appccelerate.Bootstrapper
         public void Run_ShouldThrowExceptionWhenNotInitialized()
         {
             this.testee.Invoking(t => t.Run())
-                .ShouldThrow<InvalidOperationException>();
+                .Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
@@ -195,7 +195,7 @@ namespace Appccelerate.Bootstrapper
         public void Shutdown_ShouldThrowExceptionWhenNotInitialized()
         {
             this.testee.Invoking(t => t.Shutdown())
-                .ShouldThrow<InvalidOperationException>();
+                .Should().Throw<InvalidOperationException>();
         }
 
         [Fact]

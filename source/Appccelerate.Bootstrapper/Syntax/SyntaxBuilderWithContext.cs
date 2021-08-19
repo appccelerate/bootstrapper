@@ -88,7 +88,7 @@ namespace Appccelerate.Bootstrapper.Syntax
         /// <inheritdoc />
         public IWithBehaviorOnContext<TExtension, TContext> With(Expression<Func<TContext, IBehavior<TExtension>>> provider)
         {
-            Ensure.ArgumentNotNull(provider, "provider");
+            Guard.AgainstNullArgument(nameof(provider), provider);
 
             this.behaviorProviders.Enqueue(provider.Compile());
 
