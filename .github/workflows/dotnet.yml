@@ -1,0 +1,34 @@
+name: .NET Test
+
+on:
+  push:
+  pull_request:
+    branches: [ master, develop, release* ]
+    
+jobs:
+   
+  build:
+  
+    env:
+      SOLUTION: "./source/Appccelerate.Bootstrapper.sln"
+
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore ${{env.SOLUTION}}
+      
+    - name: Build
+      run: dotnet build ${{env.SOLUTION}} --no-restore
+      
+    - name: Test
+      run: dotnet test ${{env.SOLUTION}} --no-build --verbosity minimal

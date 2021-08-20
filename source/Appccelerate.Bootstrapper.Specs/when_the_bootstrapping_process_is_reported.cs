@@ -18,103 +18,157 @@
 
 namespace Appccelerate.Bootstrapper
 {
+    using Dummies;
+    using Reporting;
+    using Helpers;
+    using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Globalization;
     using System.Linq;
     using System.Text;
-    using Appccelerate.Bootstrapper.Helpers;
-    using Appccelerate.Bootstrapper.Reporting;
     using FluentAssertions;
-    using Machine.Specifications;
+    using Xunit;
 
-    [Subject(Concern)]
-    public class When_the_bootstrapping_process_is_reported : BootstrapperReportingSpecification
+    public class WhenTheBootstrappingProcessIsReported
     {
-        private static StringReporter ExpectedContextReporter;
-        private static StringReporter InterceptingContextReporter;
+        private readonly StringReporter expectedContextReporter;
+        private readonly StringReporter interceptingContextReporter;
 
-        Establish context = () =>
+        public WhenTheBootstrappingProcessIsReported()
         {
-            ExpectedContextReporter = new StringReporter();
-            InterceptingContextReporter = new StringReporter();
-
-            Bootstrapper.Initialize(Strategy);
-            Bootstrapper.AddExtension(First);
-            Bootstrapper.AddExtension(Second);
-
-            RegisterReporter(InterceptingContextReporter);
-        };
-
-        Because of = () =>
-        {
-            Bootstrapper.Run();
-            Bootstrapper.Shutdown();
-            Bootstrapper.Dispose();
-        };
-
-        It should_report_names_and_descriptions_of_all_extensions_including_executables_with_behaviors_attached_to_it_and_run_and_shutdown_executors = () =>
+            var reporters = new ReporterCollection
             {
-                const string ActionExecutableCustomExtension = "Appccelerate.Bootstrapper.Syntax.Executables.ActionExecutable<Appccelerate.Bootstrapper.Dummies.ICustomExtension>";
-                const string ActionOnExtensionExecutableCustomExtension = "Appccelerate.Bootstrapper.Syntax.Executables.ActionOnExtensionExecutable<Appccelerate.Bootstrapper.Dummies.ICustomExtension>";
-                const string ActionExecutableWithDictionaryContextCustomExtension = "Appccelerate.Bootstrapper.Syntax.Executables.ActionOnExtensionWithInitializerExecutable<System.Collections.Generic.IDictionary<System.String,System.String>,Appccelerate.Bootstrapper.Dummies.ICustomExtension>";
-                const string ActionExecutableWithStringContextCustomExtension = "Appccelerate.Bootstrapper.Syntax.Executables.ActionOnExtensionWithInitializerExecutable<System.String,Appccelerate.Bootstrapper.Dummies.ICustomExtension>";
-
-                const string BehaviorCustomExtension = "Appccelerate.Bootstrapper.Dummies.Behavior";
-                const string LazyBehaviorCustomExtension = "Appccelerate.Bootstrapper.Behavior.LazyBehavior<Appccelerate.Bootstrapper.Dummies.ICustomExtension>";
-                const string BehaviorWithConfigurationContextCustomExtension = "Appccelerate.Bootstrapper.Dummies.BehaviorWithConfigurationContext";
-                const string BehaviorWithStringContextCustomExtension = "Appccelerate.Bootstrapper.Dummies.BehaviorWithStringContext";
-
-                var expectedContext = ReportingContextBuilder.Create()
-                    .Extension("Appccelerate.Bootstrapper.Dummies.FirstExtension", "First Extension")
-                    .Extension("Appccelerate.Bootstrapper.Dummies.SecondExtension", "Second Extension")
-                    .Run("Appccelerate.Bootstrapper.Execution.SynchronousExecutor<Appccelerate.Bootstrapper.Dummies.ICustomExtension>", "Runs all executables synchronously on the extensions in the order which they were added.")
-                        .Executable(ActionExecutableCustomExtension, "Executes \"() => Invoke(SyntaxBuilder`1.BeginWith)\" during bootstrapping.")
-                            .Behavior(BehaviorCustomExtension, BehaviorCustomExtensionDescriptionWith("run first beginning"))
-                            .Behavior(LazyBehaviorCustomExtension, LazyBehaviorCustomExtensionDescriptionWith("() => new Behavior(\"run second beginning\")"))
-                        .Executable(ActionExecutableCustomExtension, "Executes \"() => value(Appccelerate.Bootstrapper.Dummies.CustomExtensionWithBehaviorStrategy).DumpAction(\"CustomRun\")\" during bootstrapping.")
-                        .Executable(ActionOnExtensionExecutableCustomExtension, "Executes \"extension => extension.Start()\" on each extension during bootstrapping.")
-                            .Behavior(BehaviorCustomExtension, BehaviorCustomExtensionDescriptionWith("run first start"))
-                            .Behavior(LazyBehaviorCustomExtension, LazyBehaviorCustomExtensionDescriptionWith("() => new Behavior(\"run second start\")"))
-                        .Executable(ActionExecutableWithDictionaryContextCustomExtension, "Initializes the context once with \"() => value(Appccelerate.Bootstrapper.Dummies.CustomExtensionWithBehaviorStrategy).RunInitializeConfiguration()\" and executes \"(extension, dictionary) => extension.Configure(dictionary)\" on each extension during bootstrapping.")
-                            .Behavior(BehaviorWithConfigurationContextCustomExtension, BehaviorWithConfigurationContextCustomExtensionDescriptionWith("RunFirstValue", "RunTestValue"))
-                            .Behavior(BehaviorWithConfigurationContextCustomExtension, BehaviorWithConfigurationContextCustomExtensionDescriptionWith("RunSecondValue", "RunTestValue"))
-                        .Executable(ActionOnExtensionExecutableCustomExtension, "Executes \"extension => extension.Initialize()\" on each extension during bootstrapping.")
-                            .Behavior(BehaviorCustomExtension, BehaviorCustomExtensionDescriptionWith("run first initialize"))
-                            .Behavior(LazyBehaviorCustomExtension, LazyBehaviorCustomExtensionDescriptionWith("() => new Behavior(\"run second initialize\")"))
-                        .Executable(ActionExecutableWithStringContextCustomExtension, "Initializes the context once with \"() => \"RunTest\"\" and executes \"(extension, context) => extension.Register(context)\" on each extension during bootstrapping.")
-                            .Behavior(BehaviorWithStringContextCustomExtension, BehaviorWithStringContextCustomExtensionDescriptionWith("RunTestValueFirst"))
-                            .Behavior(BehaviorWithStringContextCustomExtension, BehaviorWithStringContextCustomExtensionDescriptionWith("RunTestValueSecond"))
-                        .Executable(ActionExecutableCustomExtension, "Executes \"() => Invoke(SyntaxBuilder`1.EndWith)\" during bootstrapping.")
-                            .Behavior(BehaviorCustomExtension, BehaviorCustomExtensionDescriptionWith("run first end"))
-                            .Behavior(LazyBehaviorCustomExtension, LazyBehaviorCustomExtensionDescriptionWith("() => new Behavior(\"run second end\")"))
-                    .Shutdown("Appccelerate.Bootstrapper.Execution.SynchronousReverseExecutor<Appccelerate.Bootstrapper.Dummies.ICustomExtension>", "Runs all executables synchronously on the extensions in the reverse order which they were added.")
-                        .Executable(ActionExecutableCustomExtension, "Executes \"() => Invoke(SyntaxBuilder`1.BeginWith)\" during bootstrapping.")
-                            .Behavior(BehaviorCustomExtension, BehaviorCustomExtensionDescriptionWith("shutdown first beginning"))
-                            .Behavior(LazyBehaviorCustomExtension, LazyBehaviorCustomExtensionDescriptionWith("() => new Behavior(\"shutdown second beginning\")"))
-                        .Executable(ActionExecutableCustomExtension, "Executes \"() => value(Appccelerate.Bootstrapper.Dummies.CustomExtensionWithBehaviorStrategy).DumpAction(\"CustomShutdown\")\" during bootstrapping.")
-                        .Executable(ActionExecutableWithStringContextCustomExtension, "Initializes the context once with \"() => \"ShutdownTest\"\" and executes \"(extension, ctx) => extension.Unregister(ctx)\" on each extension during bootstrapping.")
-                            .Behavior(BehaviorWithStringContextCustomExtension, BehaviorWithStringContextCustomExtensionDescriptionWith("ShutdownTestValueFirst"))
-                            .Behavior(BehaviorWithStringContextCustomExtension, BehaviorWithStringContextCustomExtensionDescriptionWith("ShutdownTestValueSecond"))
-                        .Executable(ActionExecutableWithDictionaryContextCustomExtension, "Initializes the context once with \"() => value(Appccelerate.Bootstrapper.Dummies.CustomExtensionWithBehaviorStrategy).ShutdownInitializeConfiguration()\" and executes \"(extension, dictionary) => extension.DeConfigure(dictionary)\" on each extension during bootstrapping.")
-                            .Behavior(BehaviorWithConfigurationContextCustomExtension, BehaviorWithConfigurationContextCustomExtensionDescriptionWith("ShutdownFirstValue", "ShutdownTestValue"))
-                            .Behavior(BehaviorWithConfigurationContextCustomExtension, BehaviorWithConfigurationContextCustomExtensionDescriptionWith("ShutdownSecondValue", "ShutdownTestValue"))
-                        .Executable(ActionOnExtensionExecutableCustomExtension, "Executes \"extension => extension.Stop()\" on each extension during bootstrapping.")
-                            .Behavior(BehaviorCustomExtension, BehaviorCustomExtensionDescriptionWith("shutdown first stop"))
-                            .Behavior(LazyBehaviorCustomExtension, LazyBehaviorCustomExtensionDescriptionWith("() => new Behavior(\"shutdown second stop\")"))
-                        .Executable(ActionExecutableCustomExtension, "Executes \"() => Invoke(SyntaxBuilder`1.EndWith)\" during bootstrapping.")
-                            .Behavior(BehaviorCustomExtension, BehaviorCustomExtensionDescriptionWith("shutdown first end"))
-                            .Behavior(LazyBehaviorCustomExtension, LazyBehaviorCustomExtensionDescriptionWith("() => new Behavior(\"shutdown second end\")"))
-                            .Behavior("Appccelerate.Bootstrapper.Behavior.DisposeExtensionBehavior", "Disposes all extensions which implement IDisposable.")
-                    .Build();
-
-                ExpectedContextReporter.Report(expectedContext);
-
-                InterceptingContextReporter.ToString().Should().Be(ExpectedContextReporter.ToString());
+                new InterceptingReporter(ctx => { })
             };
+            var sequenceQueue = new Queue<string>();
+            var strategy = new CustomExtensionWithBehaviorStrategy(sequenceQueue);
+            var first = new FirstExtension(sequenceQueue);
+            var second = new SecondExtension(sequenceQueue);
+
+            IBootstrapper<ICustomExtension> bootstrapper = new DefaultBootstrapper<ICustomExtension>(reporters);
+            bootstrapper.Initialize(strategy);
+            bootstrapper.AddExtension(first);
+            bootstrapper.AddExtension(second);
+
+            expectedContextReporter = new StringReporter();
+            interceptingContextReporter = new StringReporter();
+            reporters.Add(interceptingContextReporter);
+
+            bootstrapper.Run();
+            bootstrapper.Shutdown();
+            bootstrapper.Dispose();
+        }
+
+        [Fact]
+        public void
+            should_report_names_and_descriptions_of_all_extensions_including_executables_with_behaviors_attached_to_it_and_run_and_shutdown_executors()
+        {
+            const string ActionExecutableCustomExtension =
+                "Appccelerate.Bootstrapper.Syntax.Executables.ActionExecutable<Appccelerate.Bootstrapper.Dummies.ICustomExtension>";
+            const string ActionOnExtensionExecutableCustomExtension =
+                "Appccelerate.Bootstrapper.Syntax.Executables.ActionOnExtensionExecutable<Appccelerate.Bootstrapper.Dummies.ICustomExtension>";
+            const string ActionExecutableWithDictionaryContextCustomExtension =
+                "Appccelerate.Bootstrapper.Syntax.Executables.ActionOnExtensionWithInitializerExecutable<System.Collections.Generic.IDictionary<System.String,System.String>,Appccelerate.Bootstrapper.Dummies.ICustomExtension>";
+            const string ActionExecutableWithStringContextCustomExtension =
+                "Appccelerate.Bootstrapper.Syntax.Executables.ActionOnExtensionWithInitializerExecutable<System.String,Appccelerate.Bootstrapper.Dummies.ICustomExtension>";
+
+            const string BehaviorCustomExtension = "Appccelerate.Bootstrapper.Dummies.Behavior";
+            const string LazyBehaviorCustomExtension =
+                "Appccelerate.Bootstrapper.Behavior.LazyBehavior<Appccelerate.Bootstrapper.Dummies.ICustomExtension>";
+            const string BehaviorWithConfigurationContextCustomExtension =
+                "Appccelerate.Bootstrapper.Dummies.BehaviorWithConfigurationContext";
+            const string BehaviorWithStringContextCustomExtension =
+                "Appccelerate.Bootstrapper.Dummies.BehaviorWithStringContext";
+
+            expectedContextReporter.Report(ReportingContextBuilder
+                .Create()
+                .Extension("Appccelerate.Bootstrapper.Dummies.FirstExtension", "First Extension")
+                .Extension("Appccelerate.Bootstrapper.Dummies.SecondExtension", "Second Extension")
+                .Run(
+                    "Appccelerate.Bootstrapper.Execution.SynchronousExecutor<Appccelerate.Bootstrapper.Dummies.ICustomExtension>",
+                    "Runs all executables synchronously on the extensions in the order which they were added.")
+                .Executable(ActionExecutableCustomExtension,
+                    "Executes \"() => Invoke(SyntaxBuilder`1.BeginWith)\" during bootstrapping.")
+                .Behavior(BehaviorCustomExtension, BehaviorCustomExtensionDescriptionWith("run first beginning"))
+                .Behavior(LazyBehaviorCustomExtension,
+                    LazyBehaviorCustomExtensionDescriptionWith("() => new Behavior(\"run second beginning\")"))
+                .Executable(ActionExecutableCustomExtension,
+                    "Executes \"() => value(Appccelerate.Bootstrapper.Dummies.CustomExtensionWithBehaviorStrategy).DumpAction(\"CustomRun\")\" during bootstrapping.")
+                .Executable(ActionOnExtensionExecutableCustomExtension,
+                    "Executes \"extension => extension.Start()\" on each extension during bootstrapping.")
+                .Behavior(BehaviorCustomExtension, BehaviorCustomExtensionDescriptionWith("run first start"))
+                .Behavior(LazyBehaviorCustomExtension,
+                    LazyBehaviorCustomExtensionDescriptionWith("() => new Behavior(\"run second start\")"))
+                .Executable(ActionExecutableWithDictionaryContextCustomExtension,
+                    "Initializes the context once with \"() => value(Appccelerate.Bootstrapper.Dummies.CustomExtensionWithBehaviorStrategy).RunInitializeConfiguration()\" and executes \"(extension, dictionary) => extension.Configure(dictionary)\" on each extension during bootstrapping.")
+                .Behavior(BehaviorWithConfigurationContextCustomExtension,
+                    BehaviorWithConfigurationContextCustomExtensionDescriptionWith("RunFirstValue", "RunTestValue"))
+                .Behavior(BehaviorWithConfigurationContextCustomExtension,
+                    BehaviorWithConfigurationContextCustomExtensionDescriptionWith("RunSecondValue",
+                        "RunTestValue"))
+                .Executable(ActionOnExtensionExecutableCustomExtension,
+                    "Executes \"extension => extension.Initialize()\" on each extension during bootstrapping.")
+                .Behavior(BehaviorCustomExtension, BehaviorCustomExtensionDescriptionWith("run first initialize"))
+                .Behavior(LazyBehaviorCustomExtension,
+                    LazyBehaviorCustomExtensionDescriptionWith("() => new Behavior(\"run second initialize\")"))
+                .Executable(ActionExecutableWithStringContextCustomExtension,
+                    "Initializes the context once with \"() => \"RunTest\"\" and executes \"(extension, context) => extension.Register(context)\" on each extension during bootstrapping.")
+                .Behavior(BehaviorWithStringContextCustomExtension,
+                    BehaviorWithStringContextCustomExtensionDescriptionWith("RunTestValueFirst"))
+                .Behavior(BehaviorWithStringContextCustomExtension,
+                    BehaviorWithStringContextCustomExtensionDescriptionWith("RunTestValueSecond"))
+                .Executable(ActionExecutableCustomExtension,
+                    "Executes \"() => Invoke(SyntaxBuilder`1.EndWith)\" during bootstrapping.")
+                .Behavior(BehaviorCustomExtension, BehaviorCustomExtensionDescriptionWith("run first end"))
+                .Behavior(LazyBehaviorCustomExtension,
+                    LazyBehaviorCustomExtensionDescriptionWith("() => new Behavior(\"run second end\")"))
+                .Shutdown(
+                    "Appccelerate.Bootstrapper.Execution.SynchronousReverseExecutor<Appccelerate.Bootstrapper.Dummies.ICustomExtension>",
+                    "Runs all executables synchronously on the extensions in the reverse order which they were added.")
+                .Executable(ActionExecutableCustomExtension,
+                    "Executes \"() => Invoke(SyntaxBuilder`1.BeginWith)\" during bootstrapping.")
+                .Behavior(BehaviorCustomExtension,
+                    BehaviorCustomExtensionDescriptionWith("shutdown first beginning"))
+                .Behavior(LazyBehaviorCustomExtension,
+                    LazyBehaviorCustomExtensionDescriptionWith("() => new Behavior(\"shutdown second beginning\")"))
+                .Executable(ActionExecutableCustomExtension,
+                    "Executes \"() => value(Appccelerate.Bootstrapper.Dummies.CustomExtensionWithBehaviorStrategy).DumpAction(\"CustomShutdown\")\" during bootstrapping.")
+                .Executable(ActionExecutableWithStringContextCustomExtension,
+                    "Initializes the context once with \"() => \"ShutdownTest\"\" and executes \"(extension, ctx) => extension.Unregister(ctx)\" on each extension during bootstrapping.")
+                .Behavior(BehaviorWithStringContextCustomExtension,
+                    BehaviorWithStringContextCustomExtensionDescriptionWith("ShutdownTestValueFirst"))
+                .Behavior(BehaviorWithStringContextCustomExtension,
+                    BehaviorWithStringContextCustomExtensionDescriptionWith("ShutdownTestValueSecond"))
+                .Executable(ActionExecutableWithDictionaryContextCustomExtension,
+                    "Initializes the context once with \"() => value(Appccelerate.Bootstrapper.Dummies.CustomExtensionWithBehaviorStrategy).ShutdownInitializeConfiguration()\" and executes \"(extension, dictionary) => extension.DeConfigure(dictionary)\" on each extension during bootstrapping.")
+                .Behavior(BehaviorWithConfigurationContextCustomExtension,
+                    BehaviorWithConfigurationContextCustomExtensionDescriptionWith("ShutdownFirstValue",
+                        "ShutdownTestValue"))
+                .Behavior(BehaviorWithConfigurationContextCustomExtension,
+                    BehaviorWithConfigurationContextCustomExtensionDescriptionWith("ShutdownSecondValue",
+                        "ShutdownTestValue"))
+                .Executable(ActionOnExtensionExecutableCustomExtension,
+                    "Executes \"extension => extension.Stop()\" on each extension during bootstrapping.")
+                .Behavior(BehaviorCustomExtension, BehaviorCustomExtensionDescriptionWith("shutdown first stop"))
+                .Behavior(LazyBehaviorCustomExtension,
+                    LazyBehaviorCustomExtensionDescriptionWith("() => new Behavior(\"shutdown second stop\")"))
+                .Executable(ActionExecutableCustomExtension,
+                    "Executes \"() => Invoke(SyntaxBuilder`1.EndWith)\" during bootstrapping.")
+                .Behavior(BehaviorCustomExtension, BehaviorCustomExtensionDescriptionWith("shutdown first end"))
+                .Behavior(LazyBehaviorCustomExtension,
+                    LazyBehaviorCustomExtensionDescriptionWith("() => new Behavior(\"shutdown second end\")"))
+                .Behavior("Appccelerate.Bootstrapper.Behavior.DisposeExtensionBehavior",
+                    "Disposes all extensions which implement IDisposable.")
+                .Build());
+
+            interceptingContextReporter.ToString().Should().Be(expectedContextReporter.ToString());
+        }
 
         private static string LazyBehaviorCustomExtensionDescriptionWith(string action)
         {
-            const string LazyBehaviorDescriptionFormat = "Creates the behavior with {0} and executes behave on the lazy initialized behavior.";
+            const string LazyBehaviorDescriptionFormat =
+                "Creates the behavior with {0} and executes behave on the lazy initialized behavior.";
 
             return string.Format(CultureInfo.InvariantCulture, LazyBehaviorDescriptionFormat, action);
         }
@@ -128,16 +182,45 @@ namespace Appccelerate.Bootstrapper
 
         private static string BehaviorWithConfigurationContextCustomExtensionDescriptionWith(string key, string value)
         {
-            const string BehaviorWithConfigurationContextCustomExtensionDescription = "Dumps the key \"{0}\" and value \"{1}\" and modifies the configuration with it.";
+            const string BehaviorWithConfigurationContextCustomExtensionDescription =
+                "Dumps the key \"{0}\" and value \"{1}\" and modifies the configuration with it.";
 
-            return string.Format(CultureInfo.InvariantCulture, BehaviorWithConfigurationContextCustomExtensionDescription, key, value);
+            return string.Format(CultureInfo.InvariantCulture,
+                BehaviorWithConfigurationContextCustomExtensionDescription, key, value);
         }
 
         private static string BehaviorWithStringContextCustomExtensionDescriptionWith(string value)
         {
             const string BehaviorWithStringContextCustomExtensionDescription = "Dumps \"{0}\" on all extensions.";
 
-            return string.Format(CultureInfo.InvariantCulture, BehaviorWithStringContextCustomExtensionDescription, value);
+            return string.Format(CultureInfo.InvariantCulture, BehaviorWithStringContextCustomExtensionDescription,
+                value);
+        }
+
+        private class ReporterCollection : Collection<IReporter>, IReporter
+        {
+            public void Report(IReportingContext context)
+            {
+                foreach (IReporter reporter in this.Items)
+                {
+                    reporter.Report(context);
+                }
+            }
+        }
+
+        private class InterceptingReporter : IReporter
+        {
+            private readonly Action<IReportingContext> contextInterceptor;
+
+            public InterceptingReporter(Action<IReportingContext> contextInterceptor)
+            {
+                this.contextInterceptor = contextInterceptor;
+            }
+
+            public void Report(IReportingContext context)
+            {
+                this.contextInterceptor(context);
+            }
         }
 
         private class StringReporter : IReporter
@@ -185,7 +268,8 @@ namespace Appccelerate.Bootstrapper
 
             private static void Dump(string name, string description, StringBuilder sb, int indent)
             {
-                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "{0}[Name = {1}, Description = {2}]", string.Empty.PadLeft(indent), name, description));
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "{0}[Name = {1}, Description = {2}]",
+                    string.Empty.PadLeft(indent), name, description));
             }
         }
     }

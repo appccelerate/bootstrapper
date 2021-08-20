@@ -35,7 +35,7 @@ namespace Appccelerate.Bootstrapper.Reporting
         /// <param name="describable">The describable.</param>
         public ExecutableContext(IDescribable describable)
         {
-            Ensure.ArgumentNotNull(describable, "describable");
+            Guard.AgainstNullArgument(nameof(describable), describable);
 
             this.behaviors = new Collection<IBehaviorContext>();
 

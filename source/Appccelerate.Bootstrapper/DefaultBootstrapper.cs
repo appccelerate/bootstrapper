@@ -104,7 +104,7 @@ namespace Appccelerate.Bootstrapper
         /// <inheritdoc />
         public void Initialize(IStrategy<TExtension> strategy)
         {
-            Ensure.ArgumentNotNull(strategy, "strategy");
+            Guard.AgainstNullArgument(nameof(strategy), strategy);
 
             this.CheckAlreadyInitialized();
 

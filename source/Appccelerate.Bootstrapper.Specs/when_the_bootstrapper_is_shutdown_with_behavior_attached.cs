@@ -18,88 +18,96 @@
 
 namespace Appccelerate.Bootstrapper
 {
+    using Dummies;
     using System.Collections.Generic;
-    using System.Linq;
-    using Appccelerate.Bootstrapper.Dummies;
     using FluentAssertions;
-    using Machine.Specifications;
+    using Xunit;
 
-    [Subject(Concern)]
-    public class When_the_bootstrapper_is_shutdown_with_behavior_attached : BootstrapperWithBehaviorSpecification
+    public class WhenTheBootstrapperIsShutdownWithBehaviorAttached
     {
-        Establish context = () =>
-        {
-            Bootstrapper.Initialize(Strategy);
-            Bootstrapper.AddExtension(First);
-            Bootstrapper.AddExtension(Second);
-        };
+        private readonly Queue<string> sequenceQueue;
+        private readonly CustomExtensionWithBehaviorStrategy strategy;
+        private readonly FirstExtension first;
+        private readonly SecondExtension second;
 
-        Because of = () =>
+        public WhenTheBootstrapperIsShutdownWithBehaviorAttached()
         {
-            Bootstrapper.Shutdown();
-        };
+            sequenceQueue = new Queue<string>();
+            strategy = new CustomExtensionWithBehaviorStrategy(sequenceQueue);
+            first = new FirstExtension(sequenceQueue);
+            second = new SecondExtension(sequenceQueue);
 
-        It should_only_initialize_contexts_once_for_all_extensions = () =>
+            var bootstrapper = new DefaultBootstrapper<ICustomExtension>();
+            bootstrapper.Initialize(strategy);
+            bootstrapper.AddExtension(first);
+            bootstrapper.AddExtension(second);
+            bootstrapper.Shutdown();
+        }
+
+        [Fact]
+        public void should_only_initialize_contexts_once_for_all_extensions()
         {
-            Strategy.ShutdownConfigurationInitializerAccessCounter.Should().Be(1);
-        };
+            strategy.ShutdownConfigurationInitializerAccessCounter.Should().Be(1);
+        }
 
-        It should_pass_the_initialized_values_from_the_contexts_to_the_extensions = () =>
+        [Fact]
+        public void should_pass_the_initialized_values_from_the_contexts_to_the_extensions()
         {
             var expected = new Dictionary<string, string>
-                {
-                    { "ShutdownTest", "ShutdownTestValue" },
-                    { "ShutdownFirstValue", "ShutdownTestValue" },
-                    { "ShutdownSecondValue", "ShutdownTestValue" },
-                };
+            {
+                { "ShutdownTest", "ShutdownTestValue" },
+                { "ShutdownFirstValue", "ShutdownTestValue" },
+                { "ShutdownSecondValue", "ShutdownTestValue" },
+            };
 
-            First.ShutdownConfiguration.Should().Equal(expected);
-            Second.ShutdownConfiguration.Should().Equal(expected);
+            first.ShutdownConfiguration.Should().Equal(expected);
+            second.ShutdownConfiguration.Should().Equal(expected);
 
-            First.Unregistered.Should().Be("ShutdownTest");
-            Second.Unregistered.Should().Be("ShutdownTest");
-        };
+            first.Unregistered.Should().Be("ShutdownTest");
+            second.Unregistered.Should().Be("ShutdownTest");
+        }
 
-        It should_execute_the_extensions_with_its_extension_points_and_the_behaviors_according_to_the_strategy_defined_order = () =>
+        [Fact]
+        public void should_execute_the_extensions_with_its_extension_points_and_the_behaviors_according_to_the_strategy_defined_order()
         {
-            var sequence = SequenceQueue;
+            sequenceQueue.Should().HaveCount(29, sequenceQueue.Flatten());
+            sequenceQueue.Should().BeEquivalentTo(new[]
+            {
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at shutdown first beginning.",
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at shutdown first beginning.",
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at shutdown second beginning.",
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at shutdown second beginning.",
 
-            sequence.Should().HaveCount(29, sequence.Flatten());
-            sequence.ElementAt(0).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at shutdown first beginning.");
-            sequence.ElementAt(1).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at shutdown first beginning.");
-            sequence.ElementAt(2).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at shutdown second beginning.");
-            sequence.ElementAt(3).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at shutdown second beginning.");
+                "Action: CustomShutdown",
 
-            sequence.ElementAt(4).Should().BeEquivalentTo("Action: CustomShutdown");
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at input modification with ShutdownTestValueFirst.",
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at input modification with ShutdownTestValueFirst.",
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at input modification with ShutdownTestValueSecond.",
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at input modification with ShutdownTestValueSecond.",
+                "SecondExtension: Unregister",
+                "FirstExtension: Unregister",
 
-            sequence.ElementAt(5).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at input modification with ShutdownTestValueFirst.");
-            sequence.ElementAt(6).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at input modification with ShutdownTestValueFirst.");
-            sequence.ElementAt(7).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at input modification with ShutdownTestValueSecond.");
-            sequence.ElementAt(8).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at input modification with ShutdownTestValueSecond.");
-            sequence.ElementAt(9).Should().BeEquivalentTo("SecondExtension: Unregister");
-            sequence.ElementAt(10).Should().BeEquivalentTo("FirstExtension: Unregister");
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at configuration modification with ShutdownFirstValue = ShutdownTestValue.",
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at configuration modification with ShutdownFirstValue = ShutdownTestValue.",
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at configuration modification with ShutdownSecondValue = ShutdownTestValue.",
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at configuration modification with ShutdownSecondValue = ShutdownTestValue.",
+                "SecondExtension: DeConfigure",
+                "FirstExtension: DeConfigure",
 
-            sequence.ElementAt(11).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at configuration modification with ShutdownFirstValue = ShutdownTestValue.");
-            sequence.ElementAt(12).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at configuration modification with ShutdownFirstValue = ShutdownTestValue.");
-            sequence.ElementAt(13).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at configuration modification with ShutdownSecondValue = ShutdownTestValue.");
-            sequence.ElementAt(14).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at configuration modification with ShutdownSecondValue = ShutdownTestValue.");
-            sequence.ElementAt(15).Should().BeEquivalentTo("SecondExtension: DeConfigure");
-            sequence.ElementAt(16).Should().BeEquivalentTo("FirstExtension: DeConfigure");
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at shutdown first stop.",
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at shutdown first stop.",
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at shutdown second stop.",
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at shutdown second stop.",
+                "SecondExtension: Stop",
+                "FirstExtension: Stop",
 
-            sequence.ElementAt(17).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at shutdown first stop.");
-            sequence.ElementAt(18).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at shutdown first stop.");
-            sequence.ElementAt(19).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at shutdown second stop.");
-            sequence.ElementAt(20).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at shutdown second stop.");
-            sequence.ElementAt(21).Should().BeEquivalentTo("SecondExtension: Stop");
-            sequence.ElementAt(22).Should().BeEquivalentTo("FirstExtension: Stop");
-
-            sequence.ElementAt(23).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at shutdown first end.");
-            sequence.ElementAt(24).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at shutdown first end.");
-            sequence.ElementAt(25).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at shutdown second end.");
-            sequence.ElementAt(26).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at shutdown second end.");
-
-            sequence.ElementAt(27).Should().BeEquivalentTo("SecondExtension: Dispose");
-            sequence.ElementAt(28).Should().BeEquivalentTo("FirstExtension: Dispose");
-        };
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at shutdown first end.",
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at shutdown first end.",
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at shutdown second end.",
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at shutdown second end.",
+                "SecondExtension: Dispose",
+                "FirstExtension: Dispose"
+            });
+        }
     }
 }

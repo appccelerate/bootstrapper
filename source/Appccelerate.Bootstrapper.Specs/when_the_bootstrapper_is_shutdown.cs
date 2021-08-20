@@ -18,61 +18,70 @@
 
 namespace Appccelerate.Bootstrapper
 {
+    using Dummies;
     using System.Collections.Generic;
-    using System.Linq;
-    using Appccelerate.Bootstrapper.Dummies;
     using FluentAssertions;
-    using Machine.Specifications;
+    using Xunit;
 
-    [Subject(Concern)]
-    public class When_the_bootstrapper_is_shutdown : BootstrapperSpecification
+    public class WhenTheBootstrapperIsShutdown
     {
-        Establish context = () =>
-        {
-            Bootstrapper.Initialize(Strategy);
-            Bootstrapper.AddExtension(First);
-            Bootstrapper.AddExtension(Second);
-        };
+        private readonly Queue<string> sequenceQueue;
+        private readonly CustomExtensionStrategy strategy;
+        private readonly FirstExtension first;
+        private readonly SecondExtension second;
 
-        Because of = () =>
+        public WhenTheBootstrapperIsShutdown()
         {
-            Bootstrapper.Shutdown();
-        };
+            sequenceQueue = new Queue<string>();
+            strategy = new CustomExtensionStrategy(sequenceQueue);
+            first = new FirstExtension(sequenceQueue);
+            second = new SecondExtension(sequenceQueue);
 
-        It should_only_initialize_contexts_once_for_all_extensions = () =>
+            var bootstrapper = new DefaultBootstrapper<ICustomExtension>();
+            bootstrapper.Initialize(strategy);
+            bootstrapper.AddExtension(first);
+            bootstrapper.AddExtension(second);
+            bootstrapper.Shutdown();
+        }
+
+        [Fact]
+        public void should_only_initialize_contexts_once_for_all_extensions()
         {
-            Strategy.ShutdownConfigurationInitializerAccessCounter.Should().Be(1);
-        };
+            strategy.ShutdownConfigurationInitializerAccessCounter.Should().Be(1);
+        }
 
-        It should_pass_the_initialized_values_from_the_contexts_to_the_extensions = () =>
+        [Fact]
+        public void should_pass_the_initialized_values_from_the_contexts_to_the_extensions()
         {
             var expected = new Dictionary<string, string>
-                {
-                    { "ShutdownTest", "ShutdownTestValue" }
-                };
+            {
+                { "ShutdownTest", "ShutdownTestValue" }
+            };
 
-            First.ShutdownConfiguration.Should().Equal(expected);
-            Second.ShutdownConfiguration.Should().Equal(expected);
+            first.ShutdownConfiguration.Should().Equal(expected);
+            second.ShutdownConfiguration.Should().Equal(expected);
 
-            First.Unregistered.Should().Be("ShutdownTest");
-            Second.Unregistered.Should().Be("ShutdownTest");
-        };
+            first.Unregistered.Should().Be("ShutdownTest");
+            second.Unregistered.Should().Be("ShutdownTest");
+        }
 
-        It should_execute_the_extensions_and_the_extension_points_according_to_the_strategy_defined_order = () =>
+        [Fact]
+        public void should_execute_the_extensions_and_the_extension_points_according_to_the_strategy_defined_order()
         {
-            var sequence = SequenceQueue;
+            sequenceQueue.Should().HaveCount(7, sequenceQueue.Flatten());
+            sequenceQueue.Should().BeEquivalentTo(new[]
+            {
+                "Action: CustomShutdown",
 
-            sequence.Should().HaveCount(7, sequence.Flatten());
-            sequence.ElementAt(0).Should().StartWith("Action: CustomShutdown");
+                "SecondExtension: Unregister",
+                "FirstExtension: Unregister",
 
-            sequence.ElementAt(1).Should().StartWith("SecondExtension: Unregister");
-            sequence.ElementAt(2).Should().StartWith("FirstExtension: Unregister");
+                "SecondExtension: DeConfigure",
+                "FirstExtension: DeConfigure",
 
-            sequence.ElementAt(3).Should().StartWith("SecondExtension: DeConfigure");
-            sequence.ElementAt(4).Should().StartWith("FirstExtension: DeConfigure");
-
-            sequence.ElementAt(5).Should().StartWith("SecondExtension: Stop");
-            sequence.ElementAt(6).Should().StartWith("FirstExtension: Stop");
-        };
+                "SecondExtension: Stop",
+                "FirstExtension: Stop"
+            });
+        }
     }
 }

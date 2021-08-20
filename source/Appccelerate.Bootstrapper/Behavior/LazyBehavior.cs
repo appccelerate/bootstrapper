@@ -41,7 +41,7 @@ namespace Appccelerate.Bootstrapper.Behavior
         /// <param name="behaviorProvider">The behavior provider.</param>
         public LazyBehavior(Expression<Func<IBehavior<TExtension>>> behaviorProvider)
         {
-            Ensure.ArgumentNotNull(behaviorProvider, "behaviorProvider");
+            Guard.AgainstNullArgument(nameof(behaviorProvider), behaviorProvider);
 
             this.behaviorProviderExpression = behaviorProvider;
             this.behaviorProvider = this.behaviorProviderExpression.Compile();

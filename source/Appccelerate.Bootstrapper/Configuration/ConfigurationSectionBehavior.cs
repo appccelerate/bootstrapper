@@ -48,18 +48,12 @@ namespace Appccelerate.Bootstrapper.Configuration
         }
 
         /// <inheritdoc />
-        public string Name
-        {
-            get
-            {
-                return this.GetType().FullNameToString();
-            }
-        }
+        public string Name => this.GetType().FullNameToString();
 
         /// <inheritdoc />
         public void Behave(IEnumerable<IExtension> extensions)
         {
-            Ensure.ArgumentNotNull(extensions, "extensions");
+            Guard.AgainstNullArgument(nameof(extensions), extensions);
 
             foreach (IExtension extension in extensions)
             {

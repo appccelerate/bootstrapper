@@ -30,10 +30,10 @@ namespace Appccelerate.Bootstrapper.Configuration.Internals
         /// <inheritdoc />
         public void Assign(IReflectExtensionProperties reflector, IExtension extension, IConsumeConfiguration consumer, IHaveConversionCallbacks conversionCallbacksProvider, IHaveDefaultConversionCallback defaultConversionCallbackProvider)
         {
-            Ensure.ArgumentNotNull(reflector, "reflector");
-            Ensure.ArgumentNotNull(consumer, "consumer");
-            Ensure.ArgumentNotNull(conversionCallbacksProvider, "conversionCallbacksProvider");
-            Ensure.ArgumentNotNull(defaultConversionCallbackProvider, "defaultConversionCallbackProvider");
+            Guard.AgainstNullArgument(nameof(reflector), reflector);
+            Guard.AgainstNullArgument(nameof(consumer), consumer);
+            Guard.AgainstNullArgument(nameof(conversionCallbacksProvider), conversionCallbacksProvider);
+            Guard.AgainstNullArgument(nameof(defaultConversionCallbackProvider), defaultConversionCallbackProvider);
 
             var properties = reflector.Reflect(extension).ToList();
             IDictionary<string, IConversionCallback> conversionCallbacks = conversionCallbacksProvider.ConversionCallbacks;

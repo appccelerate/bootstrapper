@@ -19,7 +19,6 @@
 namespace Appccelerate.Bootstrapper
 {
     using System;
-
     using Appccelerate.Bootstrapper.Execution;
     using Appccelerate.Bootstrapper.Extension;
     using Appccelerate.Bootstrapper.Reporting;
@@ -48,7 +47,7 @@ namespace Appccelerate.Bootstrapper
         {
             this.testee.BuildRunSyntax();
 
-            this.testee.Invoking(x => x.BuildRunSyntax()).ShouldThrow<InvalidOperationException>();
+            this.testee.Invoking(x => x.BuildRunSyntax()).Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
@@ -65,7 +64,7 @@ namespace Appccelerate.Bootstrapper
         {
             this.testee.BuildShutdownSyntax();
 
-            this.testee.Invoking(x => x.BuildShutdownSyntax()).ShouldThrow<InvalidOperationException>();
+            this.testee.Invoking(x => x.BuildShutdownSyntax()).Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
@@ -114,12 +113,13 @@ namespace Appccelerate.Bootstrapper
         {
             this.testee.Dispose();
 
-            this.testee.Invoking(t => t.Dispose()).ShouldNotThrow();
+            this.testee.Invoking(t => t.Dispose()).Should().NotThrow();
         }
 
         private class TestableAbstractStrategy : AbstractStrategy<IExtension>
         {
-            public TestableAbstractStrategy(ISyntaxBuilder<IExtension> runSyntaxBuilder, ISyntaxBuilder<IExtension> shutdownSyntaxBuilder)
+            public TestableAbstractStrategy(ISyntaxBuilder<IExtension> runSyntaxBuilder,
+                ISyntaxBuilder<IExtension> shutdownSyntaxBuilder)
                 : base(runSyntaxBuilder, shutdownSyntaxBuilder)
             {
             }

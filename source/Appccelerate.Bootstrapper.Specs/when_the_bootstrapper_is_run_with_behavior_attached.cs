@@ -18,92 +18,101 @@
 
 namespace Appccelerate.Bootstrapper
 {
+    using Dummies;
     using System.Collections.Generic;
-    using System.Linq;
-    using Appccelerate.Bootstrapper.Dummies;
     using FluentAssertions;
-    using Machine.Specifications;
+    using Xunit;
 
-    [Subject(Concern)]
-    public class When_the_bootstrapper_is_run_with_behavior_attached : BootstrapperWithBehaviorSpecification
+    public class WhenTheBootstrapperIsRunWithBehaviorAttached
     {
-        Establish context = () =>
-        {
-            Bootstrapper.Initialize(Strategy);
-            Bootstrapper.AddExtension(First);
-            Bootstrapper.AddExtension(Second);
-        };
+        private readonly Queue<string> sequenceQueue;
+        private readonly CustomExtensionWithBehaviorStrategy strategy;
+        private readonly FirstExtension first;
+        private readonly SecondExtension second;
 
-        Because of = () =>
+        public WhenTheBootstrapperIsRunWithBehaviorAttached()
         {
-            Bootstrapper.Run();
-        };
+            sequenceQueue = new Queue<string>();
+            strategy = new CustomExtensionWithBehaviorStrategy(sequenceQueue);
+            first = new FirstExtension(sequenceQueue);
+            second = new SecondExtension(sequenceQueue);
 
-        It should_only_initialize_contexts_once_for_all_extensions = () =>
+            var bootstrapper = new DefaultBootstrapper<ICustomExtension>();
+            bootstrapper.Initialize(strategy);
+            bootstrapper.AddExtension(first);
+            bootstrapper.AddExtension(second);
+            bootstrapper.Run();
+        }
+
+        [Fact]
+        public void should_only_initialize_contexts_once_for_all_extensions()
         {
-            Strategy.RunConfigurationInitializerAccessCounter.Should().Be(1);
-        };
+            strategy.RunConfigurationInitializerAccessCounter.Should().Be(1);
+        }
 
-        It should_pass_the_initialized_values_from_the_contexts_to_the_extensions = () =>
+        [Fact]
+        public void should_pass_the_initialized_values_from_the_contexts_to_the_extensions()
         {
             var expected = new Dictionary<string, string>
-                {
-                    { "RunTest", "RunTestValue" },
-                    { "RunFirstValue", "RunTestValue" },
-                    { "RunSecondValue", "RunTestValue" },
-                };
+            {
+                { "RunTest", "RunTestValue" },
+                { "RunFirstValue", "RunTestValue" },
+                { "RunSecondValue", "RunTestValue" },
+            };
 
-            First.RunConfiguration.Should().Equal(expected);
-            Second.RunConfiguration.Should().Equal(expected);
+            first.RunConfiguration.Should().Equal(expected);
+            second.RunConfiguration.Should().Equal(expected);
 
-            First.Registered.Should().Be("RunTest");
-            Second.Registered.Should().Be("RunTest");
-        };
+            first.Registered.Should().Be("RunTest");
+            second.Registered.Should().Be("RunTest");
+        }
 
-        It should_execute_the_extensions_with_its_extension_points_and_the_behaviors_according_to_the_strategy_defined_order = () =>
+        [Fact]
+        public void should_execute_the_extensions_with_its_extension_points_and_the_behaviors_according_to_the_strategy_defined_order()
         {
-            var sequence = SequenceQueue;
+            sequenceQueue.Should().HaveCount(33, sequenceQueue.Flatten());
+            sequenceQueue.Should().BeEquivalentTo(new[]
+            {
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at run first beginning.",
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at run first beginning.",
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at run second beginning.",
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at run second beginning.",
 
-            sequence.Should().HaveCount(33, sequence.Flatten());
-            sequence.ElementAt(0).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at run first beginning.");
-            sequence.ElementAt(1).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at run first beginning.");
-            sequence.ElementAt(2).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at run second beginning.");
-            sequence.ElementAt(3).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at run second beginning.");
+                "Action: CustomRun",
 
-            sequence.ElementAt(4).Should().BeEquivalentTo("Action: CustomRun");
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at run first start.",
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at run first start.",
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at run second start.",
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at run second start.",
+                "FirstExtension: Start",
+                "SecondExtension: Start",
 
-            sequence.ElementAt(5).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at run first start.");
-            sequence.ElementAt(6).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at run first start.");
-            sequence.ElementAt(7).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at run second start.");
-            sequence.ElementAt(8).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at run second start.");
-            sequence.ElementAt(9).Should().BeEquivalentTo("FirstExtension: Start");
-            sequence.ElementAt(10).Should().BeEquivalentTo("SecondExtension: Start");
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at configuration modification with RunFirstValue = RunTestValue.",
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at configuration modification with RunFirstValue = RunTestValue.",
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at configuration modification with RunSecondValue = RunTestValue.",
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at configuration modification with RunSecondValue = RunTestValue.",
+                "FirstExtension: Configure",
+                "SecondExtension: Configure",
 
-            sequence.ElementAt(11).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at configuration modification with RunFirstValue = RunTestValue.");
-            sequence.ElementAt(12).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at configuration modification with RunFirstValue = RunTestValue.");
-            sequence.ElementAt(13).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at configuration modification with RunSecondValue = RunTestValue.");
-            sequence.ElementAt(14).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at configuration modification with RunSecondValue = RunTestValue.");
-            sequence.ElementAt(15).Should().BeEquivalentTo("FirstExtension: Configure");
-            sequence.ElementAt(16).Should().BeEquivalentTo("SecondExtension: Configure");
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at run first initialize.",
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at run first initialize.",
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at run second initialize.",
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at run second initialize.",
+                "FirstExtension: Initialize",
+                "SecondExtension: Initialize",
 
-            sequence.ElementAt(17).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at run first initialize.");
-            sequence.ElementAt(18).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at run first initialize.");
-            sequence.ElementAt(19).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at run second initialize.");
-            sequence.ElementAt(20).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at run second initialize.");
-            sequence.ElementAt(21).Should().BeEquivalentTo("FirstExtension: Initialize");
-            sequence.ElementAt(22).Should().BeEquivalentTo("SecondExtension: Initialize");
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at input modification with RunTestValueFirst.",
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at input modification with RunTestValueFirst.",
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at input modification with RunTestValueSecond.",
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at input modification with RunTestValueSecond.",
+                "FirstExtension: Register",
+                "SecondExtension: Register",
 
-            sequence.ElementAt(23).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at input modification with RunTestValueFirst.");
-            sequence.ElementAt(24).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at input modification with RunTestValueFirst.");
-            sequence.ElementAt(25).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at input modification with RunTestValueSecond.");
-            sequence.ElementAt(26).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at input modification with RunTestValueSecond.");
-            sequence.ElementAt(27).Should().BeEquivalentTo("FirstExtension: Register");
-            sequence.ElementAt(28).Should().BeEquivalentTo("SecondExtension: Register");
-
-            sequence.ElementAt(29).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at run first end.");
-            sequence.ElementAt(30).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at run first end.");
-            sequence.ElementAt(31).Should().BeEquivalentTo("FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at run second end.");
-            sequence.ElementAt(32).Should().BeEquivalentTo("SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at run second end.");
-        };
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at run first end.",
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at run first end.",
+                "FirstExtension: Behaving on Appccelerate.Bootstrapper.Dummies.FirstExtension at run second end.",
+                "SecondExtension: Behaving on Appccelerate.Bootstrapper.Dummies.SecondExtension at run second end.",
+            });
+        }
     }
 }

@@ -53,7 +53,7 @@ namespace Appccelerate.Bootstrapper.Syntax.Executables
         /// <param name="contextInterceptor">The behavior aware.</param>
         public ActionOnExtensionWithInitializerExecutable(Expression<Func<TContext>> initializer, Expression<Action<TExtension, TContext>> action, Action<IBehaviorAware<TExtension>, TContext> contextInterceptor)
         {
-            Ensure.ArgumentNotNull(action, "action");
+            Guard.AgainstNullArgument(nameof(action), action);
 
             this.contextInterceptor = contextInterceptor;
             this.behaviors = new Queue<IBehavior<TExtension>>();
@@ -77,8 +77,8 @@ namespace Appccelerate.Bootstrapper.Syntax.Executables
         /// <inheritdoc />
         public void Execute(IEnumerable<TExtension> extensions, IExecutableContext executableContext)
         {
-            Ensure.ArgumentNotNull(extensions, "extensions");
-            Ensure.ArgumentNotNull(executableContext, "executableContext");
+            Guard.AgainstNullArgument(nameof(extensions), extensions);
+            Guard.AgainstNullArgument(nameof(executableContext), executableContext);
 
             TContext context = this.initializer();
 

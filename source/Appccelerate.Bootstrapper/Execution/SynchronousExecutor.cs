@@ -43,8 +43,8 @@ namespace Appccelerate.Bootstrapper.Execution
         /// <inheritdoc />
         public void Execute(ISyntax<TExtension> syntax, IEnumerable<TExtension> extensions, IExecutionContext executionContext)
         {
-            Ensure.ArgumentNotNull(syntax, "syntax");
-            Ensure.ArgumentNotNull(executionContext, "executionContext");
+            Guard.AgainstNullArgument(nameof(syntax), syntax);
+            Guard.AgainstNullArgument(nameof(executionContext), executionContext);
 
             foreach (IExecutable<TExtension> executable in syntax)
             {

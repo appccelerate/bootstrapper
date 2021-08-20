@@ -29,7 +29,7 @@ namespace Appccelerate.Bootstrapper.Reporting
         /// <param name="describable">The describable.</param>
         public ExtensionContext(IDescribable describable)
         {
-            Ensure.ArgumentNotNull(describable, "describable");
+            Guard.AgainstNullArgument(nameof(describable), describable);
 
             this.Name = describable.Name;
             this.Description = describable.Describe();

@@ -43,7 +43,7 @@ namespace Appccelerate.Bootstrapper.Behavior
             this.testee.Behave(new List<IExtension> { notDisposableExtension, disposableExtension });
 
             A.CallTo(() => notDisposableExtension.Dispose()).MustNotHaveHappened();
-            A.CallTo(() => disposableExtension.Dispose()).MustHaveHappened(Repeated.Exactly.Once);
+            A.CallTo(() => disposableExtension.Dispose()).MustHaveHappenedOnceExactly();
         }
 
         [Fact]

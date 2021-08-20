@@ -50,7 +50,7 @@ namespace Appccelerate.Bootstrapper.Configuration
         /// <param name="factory">The factory which creates the necessary dependencies.</param>
         public ExtensionConfigurationSectionBehavior(IExtensionConfigurationSectionBehaviorFactory factory)
         {
-            Ensure.ArgumentNotNull(factory, "factory");
+            Guard.AgainstNullArgument(nameof(factory), factory);
 
             this.factory = factory;
 
@@ -73,7 +73,7 @@ namespace Appccelerate.Bootstrapper.Configuration
         /// <param name="extensions">The extensions.</param>
         public void Behave(IEnumerable<IExtension> extensions)
         {
-            Ensure.ArgumentNotNull(extensions, "extensions");
+            Guard.AgainstNullArgument(nameof(extensions), extensions);
 
             foreach (IExtension extension in extensions)
             {

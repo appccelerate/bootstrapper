@@ -31,7 +31,7 @@ namespace Appccelerate.Bootstrapper.Configuration.Internals
         /// <inheritdoc />
         public IEnumerable<PropertyInfo> Reflect(IExtension extension)
         {
-            Ensure.ArgumentNotNull(extension, "extension");
+            Guard.AgainstNullArgument(nameof(extension), extension);
 
             return extension.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(x => x.CanWrite);
         }

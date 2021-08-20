@@ -18,50 +18,49 @@
 
 namespace Appccelerate.Bootstrapper
 {
-    using Appccelerate.Bootstrapper.Dummies;
+    using Dummies;
     using FluentAssertions;
-    using Machine.Specifications;
+    using Xunit;
 
-    [Subject(Concern)]
-    public class When_the_bootstrapper_is_run_with_configuration_section_behavior_and_extension_with_customized_loading : BootstrapperWithConfigurationSectionBehaviorSpecification
+    public class WhenTheBootstrapperIsRunWithConfigurationSectionBehaviorAndExtensionWithCustomizedLoading
     {
-        protected static CustomExtensionWithConfigurationWhichKnowsNameAndWhereToLoadFrom NameAndWhereToLoadFromExtension;
-        protected static CustomExtensionWithConfigurationWhichKnowsWhereToLoadFrom WhereToLoadFromExtension;
+        private readonly CustomExtensionWithConfigurationWhichKnowsNameAndWhereToLoadFrom nameAndWhereToLoadFromExtension;
+        private readonly CustomExtensionWithConfigurationWhichKnowsWhereToLoadFrom whereToLoadFromExtension;
 
-        Establish context = () =>
+        public WhenTheBootstrapperIsRunWithConfigurationSectionBehaviorAndExtensionWithCustomizedLoading()
         {
-            NameAndWhereToLoadFromExtension = new CustomExtensionWithConfigurationWhichKnowsNameAndWhereToLoadFrom();
-            WhereToLoadFromExtension = new CustomExtensionWithConfigurationWhichKnowsWhereToLoadFrom();
- 
-            Bootstrapper.Initialize(Strategy);
+            nameAndWhereToLoadFromExtension = new CustomExtensionWithConfigurationWhichKnowsNameAndWhereToLoadFrom();
+            whereToLoadFromExtension = new CustomExtensionWithConfigurationWhichKnowsWhereToLoadFrom();
 
-            Bootstrapper.AddExtension(NameAndWhereToLoadFromExtension);
-            Bootstrapper.AddExtension(WhereToLoadFromExtension);
-        };
+            var bootstrapper = new DefaultBootstrapper<ICustomExtensionWithConfiguration>();
+            var strategy = new CustomExtensionWithConfigurationStrategy();
+            bootstrapper.Initialize(strategy);
+            bootstrapper.AddExtension(nameAndWhereToLoadFromExtension);
+            bootstrapper.AddExtension(whereToLoadFromExtension);
+            bootstrapper.Run();
+        }
 
-        Because of = () =>
+        [Fact]
+        public void should_apply_configuration_section()
         {
-            Bootstrapper.Run();
-        };
+            nameAndWhereToLoadFromExtension.AppliedSection.Should().NotBeNull();
+            nameAndWhereToLoadFromExtension.AppliedSection.Context.Should().Be("KnowsName|KnowsLoading");
 
-        It should_apply_configuration_section = () =>
-            {
-                NameAndWhereToLoadFromExtension.AppliedSection.Should().NotBeNull();
-                NameAndWhereToLoadFromExtension.AppliedSection.Context.Should().Be("KnowsName|KnowsLoading");
+            whereToLoadFromExtension.AppliedSection.Should().NotBeNull();
+            whereToLoadFromExtension.AppliedSection.Context.Should().Be("KnowsLoading");
+        }
 
-                WhereToLoadFromExtension.AppliedSection.Should().NotBeNull();
-                WhereToLoadFromExtension.AppliedSection.Context.Should().Be("KnowsLoading");
-            };
-
-        It should_acquire_section_name = () =>
-            {
-                NameAndWhereToLoadFromExtension.SectionNameAcquired.Should().BeTrue();
-            };
-
-        It should_acquire_section = () =>
+        [Fact]
+        public void should_acquire_section_name()
         {
-            NameAndWhereToLoadFromExtension.SectionAcquired.Should().Be("FakeConfigurationSection");
-            WhereToLoadFromExtension.SectionAcquired.Should().Be("CustomExtensionWithConfigurationWhichKnowsWhereToLoadFrom");
-        };
+            nameAndWhereToLoadFromExtension.SectionNameAcquired.Should().BeTrue();
+        }
+
+        [Fact]
+        public void should_acquire_section()
+        {
+            nameAndWhereToLoadFromExtension.SectionAcquired.Should().Be("FakeConfigurationSection");
+            whereToLoadFromExtension.SectionAcquired.Should().Be("CustomExtensionWithConfigurationWhichKnowsWhereToLoadFrom");
+        }
     }
 }

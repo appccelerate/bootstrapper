@@ -29,7 +29,7 @@ namespace Appccelerate.Bootstrapper.Configuration.Internals
         /// <inheritdoc />
         public object Convert(string value, PropertyInfo targetProperty)
         {
-            Ensure.ArgumentNotNull(targetProperty, "targetProperty");
+            Guard.AgainstNullArgument(nameof(targetProperty), targetProperty);
 
             return System.Convert.ChangeType(value, targetProperty.PropertyType, CultureInfo.InvariantCulture);
         }

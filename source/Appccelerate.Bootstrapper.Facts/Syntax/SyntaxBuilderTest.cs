@@ -153,7 +153,7 @@ namespace Appccelerate.Bootstrapper.Syntax
                     .With(() => secondBehavior)
                     .With(() => thirdBehavior);
 
-            A.CallTo(() => extension.Add(A<IBehavior<ICustomExtension>>._)).MustHaveHappened(Repeated.Exactly.Times(3));
+            A.CallTo(() => extension.Add(A<IBehavior<ICustomExtension>>._)).MustHaveHappened(3, Times.Exactly);
         }
 
         [Fact]
@@ -291,7 +291,7 @@ namespace Appccelerate.Bootstrapper.Syntax
                     .With(() => thirdBehavior);
 
             A.CallTo(() => firstExtension.Add(A<IBehavior<ICustomExtension>>._)).MustNotHaveHappened();
-            A.CallTo(() => secondExtension.Add(A<IBehavior<ICustomExtension>>._)).MustHaveHappened(Repeated.Exactly.Times(3));
+            A.CallTo(() => secondExtension.Add(A<IBehavior<ICustomExtension>>._)).MustHaveHappened(3, Times.Exactly);
         }
 
         [Fact]
@@ -418,7 +418,7 @@ namespace Appccelerate.Bootstrapper.Syntax
                     .With(() => secondBehavior)
                     .With(() => thirdBehavior);
 
-            A.CallTo(() => extension.Add(A<IBehavior<ICustomExtension>>._)).MustHaveHappened(Repeated.Exactly.Times(3));
+            A.CallTo(() => extension.Add(A<IBehavior<ICustomExtension>>._)).MustHaveHappened(3, Times.Exactly);
         }
 
         [Fact]
@@ -557,7 +557,7 @@ namespace Appccelerate.Bootstrapper.Syntax
                     .With(() => secondBehavior)
                     .With(() => thirdBehavior);
 
-            A.CallTo(() => extension.Add(A<IBehavior<ICustomExtension>>._)).MustHaveHappened(Repeated.Exactly.Times(3));
+            A.CallTo(() => extension.Add(A<IBehavior<ICustomExtension>>._)).MustHaveHappened(3, Times.Exactly);
         }
 
         [Fact]

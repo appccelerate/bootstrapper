@@ -16,6 +16,8 @@
 // </copyright>
 //-------------------------------------------------------------------------------
 
+using Xunit;
+
 namespace Appccelerate.Bootstrapper.Syntax.Executables
 {
     using System.Collections.Generic;
@@ -52,7 +54,7 @@ namespace Appccelerate.Bootstrapper.Syntax.Executables
         }
 
         [Theory]
-        [PropertyData("Testees")]
+        [MemberData(nameof(Testees))]
         public void ShouldReturnTypeName(IExecutable<ICustomExtension> testee)
         {
             string expectedName = testee.GetType().FullNameToString();
@@ -61,7 +63,7 @@ namespace Appccelerate.Bootstrapper.Syntax.Executables
         }
 
         [Theory]
-        [PropertyData("Testees")]
+        [MemberData(nameof(Testees))]
         public void Execute_ShouldExecuteBehavior(IExecutable<ICustomExtension> testee)
         {
             var first = A.Fake<IBehavior<ICustomExtension>>();
@@ -78,7 +80,7 @@ namespace Appccelerate.Bootstrapper.Syntax.Executables
         }
 
         [Theory]
-        [PropertyData("Testees")]
+        [MemberData(nameof(Testees))]
         public void Execute_ShouldCreateBehaviorContextForBehaviors(IExecutable<ICustomExtension> testee)
         {
             var first = A.Fake<IBehavior<ICustomExtension>>();
